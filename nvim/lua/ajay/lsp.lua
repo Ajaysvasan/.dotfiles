@@ -276,72 +276,15 @@ local function setup_servers()
 		},
 	}
 
-	-- Java (JDTLS) - Special setup required
-	-- Note: JDTLS is complex and needs per-project configuration
-	-- This is a basic setup that works for simple Java projects
-	local jdtls_path = vim.fn.stdpath("data") .. "/mason/packages/jdtls"
-	local jdtls_bin = jdtls_path .. "/bin/jdtls"
-
-	-- Only setup if jdtls is installed
-	if vim.fn.executable(jdtls_bin) == 1 then
-		vim.lsp.config.jdtls = {
-			cmd = { jdtls_bin },
-			filetypes = { "java" },
-			root_markers = { 
-				"pom.xml", 
-				"build.gradle", 
-				"build.gradle.kts",
-				".git",
-				"mvnw",
-				"gradlew",
-			},
-			capabilities = capabilities,
-			on_attach = on_attach,
-			settings = {
-				java = {
-					signatureHelp = { enabled = true },
-					contentProvider = { preferred = "fernflower" },
-					completion = {
-						favoriteStaticMembers = {
-							"org.junit.Assert.*",
-							"org.junit.Assume.*",
-							"org.junit.jupiter.api.Assertions.*",
-							"org.junit.jupiter.api.Assumptions.*",
-							"org.junit.jupiter.api.DynamicContainer.*",
-							"org.junit.jupiter.api.DynamicTest.*",
-						},
-					},
-					sources = {
-						organizeImports = {
-							starThreshold = 9999,
-							staticStarThreshold = 9999,
-						},
-					},
-					codeGeneration = {
-						toString = {
-							template = "${object.className}{${member.name()}=${member.value}, ${otherMembers}}",
-						},
-						useBlocks = true,
-					},
-					configuration = {
-						runtimes = {
-							-- Add Java runtimes here if needed
-							-- {
-							--   name = "JavaSE-11",
-							--   path = "/usr/lib/jvm/java-11-openjdk",
-							-- },
-						},
-					},
-				},
-			},
-		}
-	end
+	-- Java (JDTLS) - Handled by dedicated jdtls.lua file
+	-- See lua/ajay/jdtls.lua for complete Spring Boot configuration
+	-- DO NOT configure JDTLS here to avoid conflicts
 end
 
 -- Setup all servers
 setup_servers()
 
--- Enable all LSP servers (remove jdtls if not installed)
+-- Enable all LSP servers (EXCLUDING jdtls - it's handled separately)
 local servers_to_enable = {
 	"html",
 	"cssls",
@@ -353,12 +296,7 @@ local servers_to_enable = {
 	"tailwindcss",
 }
 
--- Only enable jdtls if it's installed
-local jdtls_bin = vim.fn.stdpath("data") .. "/mason/packages/jdtls/bin/jdtls"
-if vim.fn.executable(jdtls_bin) == 1 then
-	table.insert(servers_to_enable, "jdtls")
-end
-
+-- Note: jdtls is NOT enabled here - it's managed by the dedicated jdtls.lua file
 vim.lsp.enable(servers_to_enable)
 
 -- Auto-command to restart LSP
